@@ -31,6 +31,8 @@ VertexShaderNew::VertexShaderNew(std::string name, std::string fileName, ID3D11D
 
         if ( m_shaderBlob )
            m_shaderBlob->Release();
+        m_shaderBlob = nullptr;
+        std::cerr << "Failed to compile vertex shader from file: " << fileName << std::endl;
     }
 }
 
@@ -38,7 +40,4 @@ VertexShaderNew::~VertexShaderNew() {
 }
 
 
-void VertexShaderNew::Execute(int x, int y, int z)
-{
-
-}
+void VertexShaderNew::Execute(int x, int y, int z) {}

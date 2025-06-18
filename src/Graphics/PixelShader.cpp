@@ -31,6 +31,8 @@ PixelShaderNew::PixelShaderNew(std::string name, std::string fileName, ID3D11Dev
 
         if ( m_shaderBlob )
            m_shaderBlob->Release();
+        m_shaderBlob = nullptr;
+        std::cerr << "Failed to compile pixel shader from file: " << fileName << std::endl;
     }
 }
 

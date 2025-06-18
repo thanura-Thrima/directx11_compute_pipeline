@@ -12,6 +12,7 @@ set(SOURCES
     src/Application.cpp
     src/geometry.cpp
     src/util/timer.cpp
+    src/Graphics/GraphicsManager.cpp
     src/Graphics/IShader.cpp
     src/Graphics/ComputeShader.cpp
     src/Graphics/VertexShader.cpp
@@ -24,7 +25,7 @@ find_package(OpenCL REQUIRED)
 include_directories(${OpenCL_INCLUDE_DIRS})
 
 # Add an executable
-add_executable(ComputePipeline ${SOURCES} )
+add_executable(ComputePipeline ${SOURCES})
 
 target_include_directories(ComputePipeline
     PRIVATE 

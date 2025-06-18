@@ -31,6 +31,8 @@ ComputeShaderNew::ComputeShaderNew(std::string name, std::string fileName, ID3D1
 
         if ( m_shaderBlob )
            m_shaderBlob->Release();
+        m_shaderBlob = nullptr;
+        std::cerr << "Failed to compile compute shader from file: " << fileName << std::endl;
     }    
 }
 
@@ -40,5 +42,44 @@ ComputeShaderNew::~ComputeShaderNew() {
 
 void ComputeShaderNew::Execute(int x, int y, int z)
 {
+    if (!IsValid() || !m_shader) {
+        std::cerr << "Compute shader is not valid or not set." << std::endl;
+        return;
+    }
+    int i = 0;
+    for(const auto& constantBuffer : m_constantBuffers)
+    {
+        m_deviceContext->CSSetConstantBuffers(i, 1, &constantBuffer);
+        i++;
+    }
+    
+    i = 0;
+    for(const auto& resourceView : m_resourceViews)
+    {
+        m_deviceContext->CSSetShaderResources(i, 1, &resourceView->shaderResourceView);
+        i++;
+    }
+    i = 0;
+    for(const auto& unorderedAccessView : m_unorderdAccessViews)
+    {
+        m_deviceContext->CSSetUnorderedAccessViews(i, 1, &unorderedAccessView->unorderedAccessView, &NO_OFFSET);
+        i++;
+    }
+    m_deviceContext->CSSetShader(m_shader, nullptr, 0);
+    m_deviceContext->Dispatch((x+15) / 16, (y+15) / 16, (z+15) / 16);
 
+    i = 0;
+    for(const auto& resourceView : m_resourceViews)
+    {
+        m_deviceContext->CSSetShaderResources(i, 1, &NULL_SRV);
+        i++;
+    }
+    i = 0;
+    for(const auto& unorderedAccessView : m_unorderdAccessViews)
+    {
+        m_deviceContext->CSSetUnorderedAccessViews(i, 1, &NULL_UAV, &NO_OFFSET);
+        i++;
+    }
+
+    m_constantBuffers.clear();
 }

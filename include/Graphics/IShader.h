@@ -27,6 +27,7 @@ public:
 	virtual void Execute(int x, int y, int z) = 0;
 	void generateConstantBuffer(ID3DBlob* blob);
 	ID3DBlob* GetShaderBlob() const { return m_shaderBlob; }
+	bool IsValid() const { return m_shaderBlob != nullptr; }
 protected:
 	std::string m_name;
 	std::string m_fileName;

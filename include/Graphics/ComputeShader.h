@@ -23,5 +23,6 @@ public:
 private:
 	std::vector<std::shared_ptr<RenderTarget>> m_resourceViews;
 	std::vector<std::shared_ptr<RenderTarget>> m_unorderdAccessViews;
+	std::vector<ID3D11Buffer*> m_constantBuffers;
 	ID3D11ComputeShader* m_shader = nullptr;
 };

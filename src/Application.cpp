@@ -587,7 +587,7 @@ bool Application::Initialize(HWND hWnd)
         &device,
         &featureLevelCreated, // Feature level
         &deviceContext
-);
+    );
     DXGI_SWAP_CHAIN_DESC scd;
     ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
 
