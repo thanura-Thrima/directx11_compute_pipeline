@@ -53,7 +53,11 @@ Application::Application(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpC
         NULL);                      // used with multiple windows, NULL
 
     ShowWindow(hWnd, nCmdShow);
-
+    m_graphicsManager = GraphicsManager::GetInstance();
+    if(!m_graphicsManager->Initialize(hWnd, WIDTH, HEIGHT)){
+        std::cerr << "Failed to initialize GraphicsManager" << std::endl;
+        exit(-1);
+    }
 	Initialize(hWnd);
 }
 
@@ -564,95 +568,8 @@ void Application::Run() {
 
 bool Application::Initialize(HWND hWnd)
 {
-    UINT createDeviceFlags = 0;
-#if defined(_DEBUG)
-    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-
-    D3D_FEATURE_LEVEL featureLevels[] = {
-        D3D_FEATURE_LEVEL_11_1,
-        D3D_FEATURE_LEVEL_11_0,
-        D3D_FEATURE_LEVEL_10_1,
-        D3D_FEATURE_LEVEL_10_0,
-    };
-    D3D_FEATURE_LEVEL featureLevelCreated;
-    HRESULT hr = D3D11CreateDevice(
-        nullptr, // Adapter
-        D3D_DRIVER_TYPE_HARDWARE,
-        nullptr, // Software
-        createDeviceFlags, // Flags
-        featureLevels, // Feature levels
-        ARRAYSIZE(featureLevels), // Feature levels count
-        D3D11_SDK_VERSION,
-        &device,
-        &featureLevelCreated, // Feature level
-        &deviceContext
-    );
-    DXGI_SWAP_CHAIN_DESC scd;
-    ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
-
-    scd.BufferCount = 1;
-    scd.BufferDesc.Width = WIDTH;
-    scd.BufferDesc.Height = HEIGHT;
-    scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    scd.BufferDesc.RefreshRate.Numerator = 60;
-    scd.BufferDesc.RefreshRate.Denominator = 1;
-    scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    scd.OutputWindow = hWnd;
-    scd.SampleDesc.Count = 1;
-    scd.SampleDesc.Quality = 0;
-    scd.Windowed = TRUE;
-    scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    scd.Flags = 0;
-    // create a device, device context and swap chain
-
-    IDXGIFactory* pFactory = nullptr;
-    IDXGIDevice* pDXGIDevice = nullptr;
-    IDXGIAdapter* pAdapter = nullptr;
-// Get the DXGI factory from the device
-    device->QueryInterface(__uuidof(IDXGIDevice), (void**)&pDXGIDevice);
-    pDXGIDevice->GetAdapter(&pAdapter);
-    pAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&pFactory);
-
-    /*auto hr = D3D11CreateDeviceAndSwapChain(NULL,
-        D3D_DRIVER_TYPE_HARDWARE,
-        NULL,
-        NULL,
-        featureLevels,
-        ARRAYSIZE(featureLevels),
-        D3D11_SDK_VERSION,
-        &scd,
-        &swapchain,
-        &device,
-        NULL,
-        &deviceContext);*/
-
-    hr = pFactory->CreateSwapChain(device, &scd, &swapchain);
-    if (FAILED(hr))
-    {
-        std::cerr << "Failed to create Direct3D device and swap chain: " << std::hex << hr << std::endl;
-        return false; // Return false if initialization failed
-    }
-
-    if (pDXGIDevice) pDXGIDevice->Release();
-    if (pAdapter) pAdapter->Release();
-    if (pFactory) pFactory->Release();
-    // get the address of the back buffer
-    ID3D11Texture2D* pBackBuffer = nullptr;
-    swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-
-    if (pBackBuffer != nullptr)
-    {
-        // use the back buffer address to create the render target
-        device->CreateRenderTargetView(pBackBuffer, nullptr, &backbuffer);
-        pBackBuffer->Release();
-    }
-    else
-    {
-        std::cerr << "Could not obtain backbuffer from swapchain";
-        exit(-1);
-    }
-
+    device = m_graphicsManager->GetDevice();
+    deviceContext = m_graphicsManager->GetDeviceContext();
     // build shaders
     ID3DBlob* errorBlob = nullptr;
 
@@ -867,6 +784,7 @@ void Application::Render()
 
     // Composite blurred half-res image with original image in pixel shader by rendering a fullscreen quad
     // to the back buffer (no need to clear since we render a fullscreen quad without depth test)
+    auto backbuffer = m_graphicsManager->GetBackBuffer();
     deviceContext->OMSetRenderTargets(1, &backbuffer, NULL);
 
     deviceContext->VSSetShader(vsQuadCompositeShader->GetShader(), 0, 0);
@@ -901,7 +819,7 @@ void Application::Render()
     deviceContext->PSSetShaderResources(0, 1, &NULL_SRV);
 
     // switch the back buffer and the front buffer
-    auto result = swapchain->Present(0, 0);
+    auto result = m_graphicsManager->GetSwapChain()->Present(0, 0);
     if (FAILED(result))
     {
          std::cout << "Present failed. HRESULT: 0x" << std::hex << result << std::endl;

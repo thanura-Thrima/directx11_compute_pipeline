@@ -6,6 +6,13 @@
 
 #include <iostream>
 
+
+#include <thread>
+#include <chrono>
+
+#include "Hw/Camera.h"
+#include "Utility/StateMachine.h"
+
 extern "C" {
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 }
@@ -14,9 +21,12 @@ __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 void AttachConsoleWindow()
 {
     AllocConsole();
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-    freopen("CONIN$", "r", stdin);
+    FILE* fpOut;
+    FILE* fpErr;
+    FILE* fpIn;
+    freopen_s(&fpOut, "CONOUT$", "w", stdout);
+    freopen_s(&fpErr, "CONOUT$", "w", stderr);
+    freopen_s(&fpIn, "CONIN$", "r", stdin);
     std::ios::sync_with_stdio();
 }
 // entry point
@@ -24,9 +34,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
     AttachConsoleWindow();
     std::cout << "Starting DirectX 11 Application..." << std::endl;
-	Application app(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-
+	/*
+    Application app(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
     app.Run();
+    */
     return 0;
 }
 

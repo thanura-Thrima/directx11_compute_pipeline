@@ -15,9 +15,10 @@
 
 
 #include "resource.h"
-#include "util/timer.h"
+#include "Utility/Timer.h"
 #include "geometry.h"
 
+#include "Graphics/GraphicsManager.h"
 #include "Graphics/ComputeShader.h"
 #include "Graphics/VertexShader.h"
 #include "Graphics/PixelShader.h"
@@ -115,5 +116,7 @@ private:
 
 	PixelShaderNew* psPhongShader = nullptr;
 	PixelShaderNew* psQuadCompositeShader = nullptr;
+
+	std::shared_ptr<GraphicsManager> m_graphicsManager = nullptr;
 };
 

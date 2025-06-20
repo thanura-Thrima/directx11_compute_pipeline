@@ -6,20 +6,23 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_package(OpenCL REQUIRED)
+
+
+add_subdirectory(tests)
 
 set(SOURCES
     src/main.cpp
     src/Application.cpp
     src/geometry.cpp
-    src/util/timer.cpp
+    src/Utility/Timer.cpp
     src/Graphics/GraphicsManager.cpp
     src/Graphics/IShader.cpp
     src/Graphics/ComputeShader.cpp
     src/Graphics/VertexShader.cpp
     src/Graphics/PixelShader.cpp
+    src/Hw/Camera.cpp
 )
-
-find_package(OpenCL REQUIRED)
 
 # Add OpenCL include directories
 include_directories(${OpenCL_INCLUDE_DIRS})
@@ -41,8 +44,12 @@ set_target_properties(ComputePipeline PROPERTIES WIN32_EXECUTABLE TRUE)
 #link_directories(${DIRECTX_SDK_PATH}/Lib/x86) # or /Lib/x64 for 64-bit
 include_directories("ext/")
 target_link_libraries(ComputePipeline PRIVATE
-  d3d11
-  d3dcompiler
+    d3d11
+    d3dcompiler
+    mf
+    mfplat
+    #mfobjects
+    mfuuid
   ${OpenCL_LIBRARIES}
 )
 

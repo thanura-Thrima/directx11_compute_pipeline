@@ -17,6 +17,8 @@ public:
 
     ID3D11Device* GetDevice() const { return m_device; }
     ID3D11DeviceContext* GetDeviceContext() const { return m_deviceContext; }
+    IDXGISwapChain* GetSwapChain() const { return m_swapChain; }
+    ID3D11RenderTargetView* GetBackBuffer() const { return m_backbuffer; }
 
     bool Initialize(HWND hWnd, int width, int height);
 
